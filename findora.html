@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Findora — Lost & Found</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F6F3EE;
+    --surface: #FDFBF8;
+    --surface2: #F0EDE7;
+    --border: #E0DAD0;
+    --border-strong: #C8C0B4;
+    --text: #1A1714;
+    --text-2: #5A544C;
+    --text-3: #9A9087;
+    --accent: #C84B2F;
+    --accent-soft: #F5E8E4;
+    --accent-text: #8B2F1A;
+    --green: #2D6A4F;
+    --green-soft: #E4F0EB;
+    --green-text: #1B4736;
+    --amber: #B45309;
+    --amber-soft: #FEF3C7;
+    --amber-text: #7C3D0A;
+    --blue: #1E4D8C;
+    --blue-soft: #E8F0FB;
+    --blue-text: #123166;
+    --radius: 12px;
+    --radius-sm: 6px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* ─── NAVBAR ─── */
+  .navbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .navbar-brand {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    text-decoration: none;
+  }
+  .navbar-brand .logo-word {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+  .navbar-brand .logo-dot {
+    width: 7px; height: 7px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: inline-block;
+    margin-bottom: 2px;
+  }
+  .navbar-nav {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    list-style: none;
+  }
+  .navbar-nav a {
+    text-decoration: none;
+    color: var(--text-2);
+    font-size: 14px;
+    font-weight: 400;
+    padding: 6px 14px;
+    border-radius: var(--radius-sm);
+    transition: background 0.15s, color 0.15s;
+  }
+  .navbar-nav a:hover, .navbar-nav a.active {
+    background: var(--surface2);
+    color: var(--text);
+  }
+  .navbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 8px 18px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+  }
+  .btn:hover { background: var(--surface2); border-color: var(--border-strong); }
+  .btn-primary {
+    background: var(--text);
+    color: var(--bg);
+    border-color: var(--text);
+  }
+  .btn-primary:hover { background: #2D2926; border-color: #2D2926; }
+  .btn-accent {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .btn-accent:hover { background: #B0401E; border-color: #B0401E; }
+  .btn-sm { padding: 5px 12px; font-size: 13px; }
+  .btn-icon {
+    padding: 7px;
+    width: 34px;
+    height: 34px;
+    justify-content: center;
+  }
+
+  /* ─── PAGE LAYOUT ─── */
+  .page { display: none; flex-direction: column; min-height: calc(100vh - 60px); }
+  .page.active { display: flex; }
+  .container { width: 100%; max-width: 1120px; margin: 0 auto; padding: 0 2rem; }
+  .page-header {
+    padding: 2.5rem 0 1.5rem;
+  }
+  .page-header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    font-weight: 400;
+    letter-spacing: -0.5px;
+    margin-bottom: 4px;
+  }
+  .page-header p { color: var(--text-2); font-size: 14px; }
+
+  /* ─── HERO (Home / Item List Page) ─── */
+  .hero {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 3.5rem 0 3rem;
+    text-align: center;
+  }
+  .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 4px 12px;
+    border-radius: 100px;
+    margin-bottom: 1.2rem;
+  }
+  .hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 48px;
+    font-weight: 400;
+    letter-spacing: -1px;
+    line-height: 1.1;
+    color: var(--text);
+    margin-bottom: 1rem;
+    max-width: 560px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .hero h1 em { font-style: italic; color: var(--accent); }
+  .hero p {
+    color: var(--text-2);
+    font-size: 16px;
+    max-width: 440px;
+    margin: 0 auto 2rem;
+    line-height: 1.7;
+  }
+  .hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+  /* ─── STATS STRIP ─── */
+  .stats-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .stat-cell {
+    background: var(--surface);
+    padding: 1.25rem 1.5rem;
+    text-align: center;
+  }
+  .stat-cell .stat-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    font-weight: 400;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-cell .stat-label { font-size: 12px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.06em; }
+  .stat-lost .stat-num { color: var(--accent); }
+  .stat-found .stat-num { color: var(--green); }
+  .stat-claimed .stat-num { color: var(--blue); }
+  .stat-total .stat-num { color: var(--text); }
+
+  /* ─── TOOLBAR ─── */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 1.25rem 0;
+  }
+  .search-wrap {
+    flex: 1;
+    min-width: 220px;
+    position: relative;
+  }
+  .search-wrap svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-3);
+    pointer-events: none;
+  }
+  .search-wrap input {
+    width: 100%;
+    padding: 9px 12px 9px 38px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .search-wrap input:focus { border-color: var(--border-strong); background: var(--surface); }
+  .search-wrap input::placeholder { color: var(--text-3); }
+  select, .select {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    padding: 8px 32px 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text);
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%239A9087' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    transition: border-color 0.15s;
+  }
+  select:focus { border-color: var(--border-strong); }
+
+  /* ─── TABLE ─── */
+  .table-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  table { width: 100%; border-collapse: collapse; }
+  table thead { background: var(--surface2); border-bottom: 1px solid var(--border); }
+  table th {
+    text-align: left;
+    padding: 10px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-2);
+    white-space: nowrap;
+  }
+  table td {
+    padding: 12px 16px;
+    font-size: 14px;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  table tr:last-child td { border-bottom: none; }
+  table tbody tr { transition: background 0.1s; }
+  table tbody tr:hover { background: var(--surface2); }
+
+  /* ─── BADGES ─── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 3px 9px;
+    border-radius: 100px;
+    white-space: nowrap;
+  }
+  .badge::before {
+    content: '';
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.7;
+  }
+  .badge-lost { background: var(--accent-soft); color: var(--accent-text); }
+  .badge-found { background: var(--green-soft); color: var(--green-text); }
+  .badge-claimed { background: var(--blue-soft); color: var(--blue-text); }
+  .badge-pending { background: var(--amber-soft); color: var(--amber-text); }
+  .badge-approved { background: var(--green-soft); color: var(--green-text); }
+  .badge-rejected { background: var(--accent-soft); color: var(--accent-text); }
+
+  /* ─── ACTION LINKS ─── */
+  .action-link {
+    font-size: 13px;
+    color: var(--blue);
+    text-decoration: none;
+    font-weight: 500;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+  }
+  .action-link:hover { text-decoration: underline; }
+  .action-link-danger { color: var(--accent); }
+
+  /* ─── PAGINATION ─── */
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--text-2);
+  }
+  .pagination-pages { display: flex; gap: 4px; }
+  .page-btn {
+    width: 30px; height: 30px;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+    font-size: 13px;
+    cursor: pointer;
+    color: var(--text-2);
+    transition: all 0.1s;
+  }
+  .page-btn:hover { background: var(--surface2); }
+  .page-btn.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  /* ─── FORM ─── */
+  .form-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .form-card-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  .form-card-header h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    font-weight: 400;
+    margin-bottom: 2px;
+  }
+  .form-card-header p { font-size: 13px; color: var(--text-2); }
+  .form-body { padding: 2rem; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1 / -1; }
+  label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-2);
+  }
+  input[type="text"], input[type="email"], input[type="password"], input[type="date"], textarea {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+    width: 100%;
+  }
+  input:focus, textarea:focus { border-color: var(--border-strong); background: var(--surface); }
+  textarea { resize: vertical; min-height: 90px; }
+  .status-toggle {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .status-option {
+    position: relative;
+  }
+  .status-option input[type="radio"] { position: absolute; opacity: 0; pointer-events: none; }
+  .status-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-2);
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .status-option input:checked + .status-label.lost-label {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--accent-text);
+  }
+  .status-option input:checked + .status-label.found-label {
+    background: var(--green-soft);
+    border-color: var(--green);
+    color: var(--green-text);
+  }
+  .status-label:hover { background: var(--surface2); border-color: var(--border-strong); }
+  .form-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    margin-top: 1.5rem;
+  }
+  .hint { font-size: 12px; color: var(--text-3); }
+
+  /* ─── ITEM DETAIL ─── */
+  .detail-layout { display: grid; grid-template-columns: 1fr 360px; gap: 2rem; padding-bottom: 3rem; }
+  .detail-main {}
+  .detail-sidebar {}
+  .detail-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .detail-card-body { padding: 2rem; }
+  .detail-card-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .detail-card-header h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    font-weight: 400;
+    line-height: 1.25;
+  }
+  .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem 2rem; }
+  .meta-item label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-3); display: block; margin-bottom: 3px; }
+  .meta-item span { font-size: 14px; color: var(--text); font-weight: 400; }
+  .divider { height: 1px; background: var(--border); margin: 1.5rem 0; }
+  .sidebar-section { margin-bottom: 1.5rem; }
+  .sidebar-section h3 { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-3); margin-bottom: 1rem; }
+
+  /* ─── MATCH SUGGESTIONS ─── */
+  .match-list { display: flex; flex-direction: column; gap: 8px; }
+  .match-item {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .match-item:hover { border-color: var(--border-strong); background: var(--surface); }
+  .match-title { font-size: 13px; font-weight: 500; color: var(--text); }
+  .match-sub { font-size: 11px; color: var(--text-3); margin-top: 1px; }
+  .match-score {
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--accent-soft);
+    color: var(--accent-text);
+    padding: 2px 7px;
+    border-radius: 100px;
+    white-space: nowrap;
+  }
+
+  /* ─── CLAIM FORM ─── */
+  .claim-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+  }
+  .claim-box h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    font-weight: 400;
+    margin-bottom: 4px;
+  }
+  .claim-box p { font-size: 13px; color: var(--text-2); margin-bottom: 1rem; }
+
+  /* ─── AUTH PAGES ─── */
+  .auth-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    background: var(--bg);
+  }
+  .auth-card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    padding: 2.5rem;
+  }
+  .auth-logo {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  .auth-logo .logo-word {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+  .auth-logo .logo-dot-lg {
+    display: inline-block;
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    margin-bottom: 2px;
+  }
+  .auth-card h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    font-weight: 400;
+    margin-bottom: 4px;
+  }
+  .auth-card > p { font-size: 14px; color: var(--text-2); margin-bottom: 1.75rem; }
+  .form-group-auth { display: flex; flex-direction: column; gap: 6px; margin-bottom: 1rem; }
+  .auth-footer { text-align: center; margin-top: 1.5rem; font-size: 13px; color: var(--text-2); }
+  .auth-footer a { color: var(--blue); text-decoration: none; font-weight: 500; cursor: pointer; }
+  .auth-footer a:hover { text-decoration: underline; }
+
+  /* ─── AUDIT LOG ─── */
+  .audit-action {
+    font-size: 12px;
+    font-family: monospace;
+    background: var(--surface2);
+    color: var(--text-2);
+    padding: 2px 7px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+
+  /* ─── CLAIMS PAGE ─── */
+  .tabs {
+    display: flex;
+    gap: 2px;
+    background: var(--surface2);
+    padding: 4px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 1.5rem;
+    width: fit-content;
+  }
+  .tab-btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 7px 18px;
+    border: none;
+    background: none;
+    color: var(--text-2);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .tab-btn.active {
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow);
+  }
+
+  /* ─── EMPTY STATE ─── */
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-3);
+  }
+  .empty-state svg { margin-bottom: 1rem; opacity: 0.3; }
+  .empty-state p { font-size: 14px; }
+
+  /* ─── SUCCESS TOAST ─── */
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--text);
+    color: var(--bg);
+    padding: 12px 20px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.25s;
+    z-index: 999;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  /* ─── MISC ─── */
+  .reporter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .avatar {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-2);
+    flex-shrink: 0;
+  }
+  .avatar-md { width: 36px; height: 36px; font-size: 13px; }
+  .section-gap { padding: 2rem 0; }
+
+  @media (max-width: 768px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .detail-layout { grid-template-columns: 1fr; }
+    .stats-strip { grid-template-columns: 1fr 1fr; }
+    .hero h1 { font-size: 32px; }
+    .container { padding: 0 1rem; }
+    .toolbar { flex-direction: column; align-items: stretch; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── NAVBAR ── -->
+<nav class="navbar">
+  <a class="navbar-brand" href="#" onclick="showPage('items')">
+    <span class="logo-word">Findora</span>
+    <span class="logo-dot"></span>
+  </a>
+  <ul class="navbar-nav" id="main-nav">
+    <li><a href="#" onclick="showPage('items')" id="nav-items" class="active">Browse Items</a></li>
+    <li><a href="#" onclick="showPage('claims')" id="nav-claims">Claims</a></li>
+    <li><a href="#" onclick="showPage('audit')" id="nav-audit">Audit Log</a></li>
+  </ul>
+  <div class="navbar-actions" id="auth-actions">
+    <button class="btn btn-sm" onclick="showPage('login')">Sign In</button>
+    <button class="btn btn-primary btn-sm" onclick="showPage('register')">Register</button>
+  </div>
+  <div class="navbar-actions" id="user-actions" style="display:none">
+    <button class="btn btn-accent btn-sm" onclick="showPage('report')">+ Report Item</button>
+    <div style="display:flex;align-items:center;gap:8px;cursor:pointer" onclick="doLogout()">
+      <div class="avatar avatar-md" id="user-avatar">AS</div>
+      <span style="font-size:14px;color:var(--text-2)" id="user-name">Alice S.</span>
+    </div>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════
+     PAGE: ITEMS (Home / Browse)
+══════════════════════════════════════ -->
+<div id="page-items" class="page active">
+  <div class="hero">
+    <div class="container">
+      <div class="hero-eyebrow">
+        <svg width="10" height="10" fill="currentColor" viewBox="0 0 10 10"><circle cx="5" cy="5" r="5"/></svg>
+        Campus Lost & Found
+      </div>
+      <h1>Find what you've <em>lost</em>, return what you've found.</h1>
+      <p>A centralized platform for reporting, searching, and claiming lost and found items across campus.</p>
+      <div class="hero-actions">
+        <button class="btn btn-primary" onclick="showPage('report')">Report an Item</button>
+        <button class="btn" onclick="document.querySelector('.toolbar').scrollIntoView({behavior:'smooth'})">Browse All Items</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-strip">
+    <div class="stat-cell stat-total">
+      <div class="stat-num">85</div>
+      <div class="stat-label">Total Items</div>
+    </div>
+    <div class="stat-cell stat-lost">
+      <div class="stat-num">42</div>
+      <div class="stat-label">Lost</div>
+    </div>
+    <div class="stat-cell stat-found">
+      <div class="stat-num">28</div>
+      <div class="stat-label">Found</div>
+    </div>
+    <div class="stat-cell stat-claimed">
+      <div class="stat-num">15</div>
+      <div class="stat-label">Claimed</div>
+    </div>
+  </div>
+
+  <div class="container section-gap">
+    <div class="toolbar">
+      <div class="search-wrap">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" placeholder="Search by title, keyword, description…" oninput="filterItems(this.value)" />
+      </div>
+      <select onchange="filterByStatus(this.value)">
+        <option value="">All Statuses</option>
+        <option value="LOST">Lost</option>
+        <option value="FOUND">Found</option>
+        <option value="CLAIMED">Claimed</option>
+      </select>
+      <select>
+        <option value="">All Categories</option>
+        <option>Electronics</option>
+        <option>Clothing</option>
+        <option>Books</option>
+        <option>Bags</option>
+        <option>Keys</option>
+        <option>Wallets</option>
+        <option>Accessories</option>
+        <option>Sports Equipment</option>
+        <option>Documents</option>
+      </select>
+      <button class="btn btn-sm" onclick="showToast('CSV downloaded!')">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export CSV
+      </button>
+    </div>
+
+    <div class="table-card">
+      <table id="items-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Category</th>
+            <th>Status</th>
+            <th>Location</th>
+            <th>Date</th>
+            <th>Reporter</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="items-tbody"></tbody>
+      </table>
+      <div class="pagination">
+        <span id="pagination-info">Showing 1–10 of 85 items</span>
+        <div class="pagination-pages">
+          <button class="page-btn" disabled>←</button>
+          <button class="page-btn active">1</button>
+          <button class="page-btn">2</button>
+          <button class="page-btn">3</button>
+          <button class="page-btn">→</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PAGE: ITEM DETAIL
+══════════════════════════════════════ -->
+<div id="page-detail" class="page">
+  <div class="container">
+    <div class="page-header">
+      <button class="btn btn-sm" onclick="showPage('items')" style="margin-bottom:1rem">
+        ← Back to Items
+      </button>
+      <h1 id="detail-title">Blue Water Bottle</h1>
+      <p id="detail-sub">Reported on Jun 1, 2024 · Library Block A</p>
+    </div>
+    <div class="detail-layout">
+      <div class="detail-main">
+        <div class="detail-card">
+          <div class="detail-card-header">
+            <div>
+              <h2 id="dc-title">Blue Water Bottle</h2>
+              <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+                <span class="badge badge-lost" id="dc-status">LOST</span>
+                <span style="font-size:13px;color:var(--text-3)">Electronics · Blue</span>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-sm">Edit</button>
+              <button class="btn btn-sm" style="color:var(--accent);border-color:var(--border)" onclick="showToast('Item deleted.')">Delete</button>
+            </div>
+          </div>
+          <div class="detail-card-body">
+            <p style="color:var(--text-2);font-size:14px;line-height:1.7;margin-bottom:1.5rem" id="dc-desc">Stainless steel water bottle with the college logo. Found near the reading tables in Library Block A on the morning of June 1st. Has a dent on the bottom left side.</p>
+            <div class="meta-grid">
+              <div class="meta-item"><label>Category</label><span id="dc-cat">Accessories</span></div>
+              <div class="meta-item"><label>Color</label><span id="dc-color">Blue</span></div>
+              <div class="meta-item"><label>Location</label><span id="dc-loc">Library Block A</span></div>
+              <div class="meta-item"><label>Date Reported</label><span id="dc-date">Jun 1, 2024</span></div>
+              <div class="meta-item"><label>Keywords</label><span id="dc-kw" style="color:var(--text-3)">bottle, steel, water, college</span></div>
+              <div class="meta-item">
+                <label>Reporter</label>
+                <div class="reporter-chip">
+                  <div class="avatar">AS</div>
+                  <span style="font-size:14px">Alice Sharma</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="detail-sidebar">
+        <div class="sidebar-section">
+          <div class="claim-box">
+            <h3>Claim this item</h3>
+            <p>Think this belongs to you? Provide some proof of ownership and we'll notify the reporter.</p>
+            <div class="form-group" style="margin-bottom:12px">
+              <label>Proof of ownership</label>
+              <textarea placeholder="Describe identifying features or how you lost it…" style="min-height:80px"></textarea>
+            </div>
+            <button class="btn btn-primary" style="width:100%" onclick="showToast('Claim submitted!')">Submit Claim</button>
+          </div>
+        </div>
+        <div class="sidebar-section">
+          <h3>Potential Matches</h3>
+          <div class="match-list">
+            <div class="match-item" onclick="loadDetail({title:'Water Bottle Found',status:'FOUND',cat:'Accessories',color:'Blue',loc:'Library Entrance',date:'May 30, 2024',kw:'bottle, water, stainless',desc:'A blue water bottle was found near the library main entrance. Has a college sticker on it.',reporter:'Bob Kumar'})">
+              <div>
+                <div class="match-title">Water Bottle Found</div>
+                <div class="match-sub">Library Entrance · May 30</div>
+              </div>
+              <span class="match-score">Score 5</span>
+            </div>
+            <div class="match-item" onclick="loadDetail({title:'Steel Bottle — Cafeteria',status:'FOUND',cat:'Accessories',color:'Blue',loc:'Cafeteria',date:'Jun 2, 2024',kw:'bottle, steel, blue',desc:'Steel bottle left at cafeteria counter.',reporter:'Priya N.'})">
+              <div>
+                <div class="match-title">Steel Bottle — Cafeteria</div>
+                <div class="match-sub">Cafeteria · Jun 2</div>
+              </div>
+              <span class="match-score">Score 3</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PAGE: REPORT ITEM
+══════════════════════════════════════ -->
+<div id="page-report" class="page">
+  <div class="container">
+    <div class="page-header">
+      <button class="btn btn-sm" onclick="showPage('items')" style="margin-bottom:1rem">← Back</button>
+      <h1>Report an Item</h1>
+      <p>Fill in the details. The more information you provide, the better the matching works.</p>
+    </div>
+    <div style="max-width:680px">
+      <div class="form-card">
+        <div class="form-card-header">
+          <h2>Item Details</h2>
+          <p>Describe the item as accurately as possible</p>
+        </div>
+        <div class="form-body">
+          <div class="form-grid">
+            <div class="form-group full">
+              <label>Item status</label>
+              <div class="status-toggle">
+                <div class="status-option">
+                  <input type="radio" name="item-status" id="status-lost" value="LOST" checked />
+                  <label for="status-lost" class="status-label lost-label">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+                    I lost something
+                  </label>
+                </div>
+                <div class="status-option">
+                  <input type="radio" name="item-status" id="status-found" value="FOUND" />
+                  <label for="status-found" class="status-label found-label">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><line x1="8" y1="11" x2="14" y2="11"/><line x1="11" y1="8" x2="11" y2="14"/></svg>
+                    I found something
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="form-group full">
+              <label for="item-title">Title</label>
+              <input type="text" id="item-title" placeholder="e.g. Blue water bottle with college logo" />
+            </div>
+            <div class="form-group full">
+              <label for="item-desc">Description</label>
+              <textarea id="item-desc" placeholder="Include any identifying features — scratches, stickers, size, brand…"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="item-cat">Category</label>
+              <select id="item-cat" style="width:100%">
+                <option value="">Select category</option>
+                <option>Electronics</option>
+                <option>Clothing</option>
+                <option>Books</option>
+                <option>Bags</option>
+                <option>Keys</option>
+                <option>Wallets</option>
+                <option>Accessories</option>
+                <option>Sports Equipment</option>
+                <option>Documents</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="item-color">Color</label>
+              <input type="text" id="item-color" placeholder="e.g. Black, Red, Blue" />
+            </div>
+            <div class="form-group">
+              <label for="item-loc">Location</label>
+              <input type="text" id="item-loc" placeholder="e.g. Library Block A, Canteen" />
+            </div>
+            <div class="form-group">
+              <label for="item-date">Date</label>
+              <input type="date" id="item-date" />
+            </div>
+            <div class="form-group full">
+              <label for="item-kw">Keywords <span class="hint">(comma-separated)</span></label>
+              <input type="text" id="item-kw" placeholder="e.g. bottle, steel, water, logo" />
+              <span class="hint">These are used by the smart matching engine</span>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn" onclick="showPage('items')">Cancel</button>
+            <button class="btn btn-primary" onclick="submitReport()">Submit Report</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Match Suggestions (shown after submit) -->
+      <div id="match-suggestions" style="display:none;margin-top:1.5rem">
+        <div class="detail-card">
+          <div class="detail-card-header">
+            <div>
+              <h2 style="font-size:18px">Possible Matches Found</h2>
+              <p style="font-size:13px;color:var(--text-2);margin-top:4px">These found items might be what you're looking for</p>
+            </div>
+            <span class="badge badge-found">2 matches</span>
+          </div>
+          <div style="padding:1rem">
+            <table style="width:100%">
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Location</th>
+                  <th>Date</th>
+                  <th>Score</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong style="font-size:13px">Water Bottle Found</strong></td>
+                  <td style="font-size:13px;color:var(--text-2)">Library Entrance</td>
+                  <td style="font-size:13px;color:var(--text-2)">May 30, 2024</td>
+                  <td><span class="badge badge-found" style="font-size:11px">5 pts</span></td>
+                  <td><button class="action-link" onclick="loadDetail({title:'Water Bottle Found',status:'FOUND',cat:'Accessories',color:'Blue',loc:'Library Entrance',date:'May 30, 2024',kw:'bottle, water',desc:'A blue water bottle found near the library main entrance.',reporter:'Bob Kumar'});showPage('detail')">View →</button></td>
+                </tr>
+                <tr>
+                  <td><strong style="font-size:13px">Steel Bottle — Cafeteria</strong></td>
+                  <td style="font-size:13px;color:var(--text-2)">Cafeteria</td>
+                  <td style="font-size:13px;color:var(--text-2)">Jun 2, 2024</td>
+                  <td><span class="badge badge-found" style="font-size:11px">3 pts</span></td>
+                  <td><button class="action-link" onclick="loadDetail({title:'Steel Bottle — Cafeteria',status:'FOUND',cat:'Accessories',color:'Blue',loc:'Cafeteria',date:'Jun 2, 2024',kw:'bottle, steel',desc:'Steel bottle left at cafeteria counter.',reporter:'Priya N.'});showPage('detail')">View →</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PAGE: CLAIMS
+══════════════════════════════════════ -->
+<div id="page-claims" class="page">
+  <div class="container">
+    <div class="page-header">
+      <h1>Claims</h1>
+      <p>Track claims you've submitted and review incoming claims on your reported items</p>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab(this,'tab-submitted')">My Submitted Claims</button>
+      <button class="tab-btn" onclick="switchTab(this,'tab-received')">Received Claims</button>
+    </div>
+    <div id="tab-submitted">
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Category</th>
+              <th>Proof Given</th>
+              <th>Submitted</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><button class="action-link" onclick="loadDetail({title:'Found Keys Bundle',status:'FOUND',cat:'Keys',color:'Red',loc:'Canteen',date:'Jun 2, 2024',kw:'keys, keychain, red',desc:'Set of 3 keys on a red keychain found near the canteen.',reporter:'Bob Kumar'});showPage('detail')">Found Keys Bundle</button></td>
+              <td style="color:var(--text-2);font-size:13px">Keys</td>
+              <td style="font-size:13px;color:var(--text-2);max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">I have a matching red keychain with 3 identical keys…</td>
+              <td style="font-size:13px;color:var(--text-3)">Jun 4, 2024</td>
+              <td><span class="badge badge-pending">PENDING</span></td>
+            </tr>
+            <tr>
+              <td><button class="action-link">Black Backpack</button></td>
+              <td style="color:var(--text-2);font-size:13px">Bags</td>
+              <td style="font-size:13px;color:var(--text-2);max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">My name tag is inside. It's a Wildcraft bag…</td>
+              <td style="font-size:13px;color:var(--text-3)">May 28, 2024</td>
+              <td><span class="badge badge-approved">APPROVED</span></td>
+            </tr>
+            <tr>
+              <td><button class="action-link">Silver Laptop Charger</button></td>
+              <td style="color:var(--text-2);font-size:13px">Electronics</td>
+              <td style="font-size:13px;color:var(--text-2);max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Dell charger, 65W, has a blue sticker near the pin…</td>
+              <td style="font-size:13px;color:var(--text-3)">May 20, 2024</td>
+              <td><span class="badge badge-rejected">REJECTED</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div id="tab-received" style="display:none">
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Claimant</th>
+              <th>Item</th>
+              <th>Proof Provided</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div class="reporter-chip">
+                  <div class="avatar">BK</div>
+                  <span style="font-size:13px">Bob Kumar</span>
+                </div>
+              </td>
+              <td><button class="action-link" style="font-size:13px">Blue Water Bottle</button></td>
+              <td style="font-size:13px;color:var(--text-2);max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">The bottle has my initials B.K. etched under the base…</td>
+              <td style="font-size:13px;color:var(--text-3)">Jun 5, 2024</td>
+              <td><span class="badge badge-pending">PENDING</span></td>
+              <td>
+                <div style="display:flex;gap:8px">
+                  <button class="btn btn-sm" style="color:var(--green);border-color:var(--green)" onclick="showToast('Claim approved!')">Approve</button>
+                  <button class="btn btn-sm" style="color:var(--accent);border-color:var(--accent)" onclick="showToast('Claim rejected.')">Reject</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PAGE: AUDIT LOG
+══════════════════════════════════════ -->
+<div id="page-audit" class="page">
+  <div class="container">
+    <div class="page-header">
+      <h1>Audit Log</h1>
+      <p>A complete, immutable record of every action in the system</p>
+    </div>
+    <div class="table-card">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Action</th>
+            <th>Entity</th>
+            <th>Performed By</th>
+            <th>Timestamp</th>
+          </tr>
+        </thead>
+        <tbody id="audit-tbody"></tbody>
+      </table>
+      <div class="pagination">
+        <span>Showing 1–10 of 47 events</span>
+        <div class="pagination-pages">
+          <button class="page-btn" disabled>←</button>
+          <button class="page-btn active">1</button>
+          <button class="page-btn">2</button>
+          <button class="page-btn">3</button>
+          <button class="page-btn">→</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PAGE: LOGIN
+══════════════════════════════════════ -->
+<div id="page-login" class="page">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <span class="logo-word">Findora</span><span class="logo-dot-lg"></span>
+      </div>
+      <h2>Welcome back</h2>
+      <p>Sign in to report items and manage claims</p>
+      <div class="form-group-auth">
+        <label>Email</label>
+        <input type="email" placeholder="you@college.edu" id="login-email" />
+      </div>
+      <div class="form-group-auth">
+        <label>Password</label>
+        <input type="password" placeholder="••••••••" id="login-pw" />
+      </div>
+      <button class="btn btn-primary" style="width:100%;margin-top:8px;padding:10px" onclick="doLogin()">Sign In</button>
+      <div class="auth-footer">
+        Don't have an account? <a onclick="showPage('register')">Register here</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PAGE: REGISTER
+══════════════════════════════════════ -->
+<div id="page-register" class="page">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <span class="logo-word">Findora</span><span class="logo-dot-lg"></span>
+      </div>
+      <h2>Create account</h2>
+      <p>Join Findora to report and claim items on campus</p>
+      <div class="form-group-auth">
+        <label>Full Name</label>
+        <input type="text" placeholder="Alice Sharma" id="reg-name" />
+      </div>
+      <div class="form-group-auth">
+        <label>College Email</label>
+        <input type="email" placeholder="alice@college.edu" id="reg-email" />
+      </div>
+      <div class="form-group-auth">
+        <label>Password <span class="hint">(min 6 characters)</span></label>
+        <input type="password" placeholder="••••••••" id="reg-pw" />
+      </div>
+      <button class="btn btn-primary" style="width:100%;margin-top:8px;padding:10px" onclick="doRegister()">Create Account</button>
+      <div class="auth-footer">
+        Already have an account? <a onclick="showPage('login')">Sign in</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+  <span id="toast-msg">Done!</span>
+</div>
+
+<script>
+// ─── DATA ───
+const ITEMS = [
+  { id:1, title:'Blue Water Bottle', cat:'Accessories', status:'LOST', location:'Library Block A', date:'Jun 1, 2024', reporter:'Alice Sharma', color:'Blue', kw:'bottle, steel, water', desc:'Stainless steel water bottle with the college logo. Has a dent on the bottom left side.' },
+  { id:2, title:'Found Keys Bundle', cat:'Keys', status:'FOUND', location:'Canteen', date:'Jun 2, 2024', reporter:'Bob Kumar', color:'Red', kw:'keys, keychain, red', desc:'Set of 3 keys on a red keychain found near the canteen entrance.' },
+  { id:3, title:'Black Backpack', cat:'Bags', status:'CLAIMED', location:'Seminar Hall', date:'May 28, 2024', reporter:'Priya N.', color:'Black', kw:'backpack, wildcraft, bag', desc:'Large black Wildcraft backpack left in seminar hall.' },
+  { id:4, title:'Silver Laptop Charger', cat:'Electronics', status:'LOST', location:'Computer Lab', date:'May 20, 2024', reporter:'Rahul V.', color:'Silver', kw:'charger, dell, laptop', desc:'Dell 65W charger with blue sticker near the pin.' },
+  { id:5, title:'Physics Textbook', cat:'Books', status:'FOUND', location:'Canteen Table 7', date:'May 31, 2024', reporter:'Meera S.', color:'Blue', kw:'book, physics, halliday', desc:'Halliday Resnick Physics textbook, 10th edition. Name written inside cover.' },
+  { id:6, title:'AirPods Case', cat:'Electronics', status:'LOST', location:'Hostel Block C', date:'Jun 3, 2024', reporter:'Arjun K.', color:'White', kw:'airpods, case, apple', desc:'White AirPods charging case, no earbuds inside.' },
+  { id:7, title:'College ID Card', cat:'Documents', status:'FOUND', location:'Main Gate', date:'Jun 4, 2024', reporter:'Security Desk', color:'Blue', kw:'id, card, college, identity', desc:'College ID card found near the main gate security cabin.' },
+  { id:8, title:'Green Hoodie', cat:'Clothing', status:'LOST', location:'Basketball Court', date:'May 25, 2024', reporter:'Sneha P.', color:'Green', kw:'hoodie, green, sports', desc:'Olive green hoodie size M, has a small tear on the left sleeve.' },
+  { id:9, title:'Scientific Calculator', cat:'Electronics', status:'FOUND', location:'Exam Hall 3', date:'May 22, 2024', reporter:'Exam Cell', color:'Black', kw:'calculator, casio, scientific', desc:'Casio fx-991EX scientific calculator, found after exam.' },
+  { id:10, title:'Brown Leather Wallet', cat:'Wallets', status:'CLAIMED', location:'Library Lobby', date:'May 18, 2024', reporter:'Library Staff', color:'Brown', kw:'wallet, leather, brown', desc:'Brown leather bifold wallet with some cards inside.' },
+];
+
+const AUDIT_DATA = [
+  { id:47, action:'CLAIM_APPROVED', entity:'claims', eid:12, user:'Alice Sharma', ts:'Jun 5, 2024 · 14:32' },
+  { id:46, action:'CLAIM_SUBMITTED', entity:'claims', eid:12, user:'Bob Kumar', ts:'Jun 5, 2024 · 11:18' },
+  { id:45, action:'ITEM_CREATED', entity:'items', eid:7, user:'Security Desk', ts:'Jun 4, 2024 · 09:05' },
+  { id:44, action:'ITEM_CREATED', entity:'items', eid:6, user:'Arjun K.', ts:'Jun 3, 2024 · 20:44' },
+  { id:43, action:'ITEM_UPDATED', entity:'items', eid:2, user:'Bob Kumar', ts:'Jun 2, 2024 · 16:10' },
+  { id:42, action:'ITEM_CREATED', entity:'items', eid:2, user:'Bob Kumar', ts:'Jun 2, 2024 · 15:58' },
+  { id:41, action:'ITEM_CREATED', entity:'items', eid:1, user:'Alice Sharma', ts:'Jun 1, 2024 · 10:30' },
+  { id:40, action:'CLAIM_REJECTED', entity:'claims', eid:9, user:'Alice Sharma', ts:'May 31, 2024 · 17:03' },
+  { id:39, action:'ITEM_CREATED', entity:'items', eid:5, user:'Meera S.', ts:'May 31, 2024 · 12:15' },
+  { id:38, action:'USER_REGISTERED', entity:'users', eid:8, user:'Sneha P.', ts:'May 25, 2024 · 08:00' },
+];
+
+let allItems = [...ITEMS];
+let currentUser = null;
+
+// ─── RENDER ───
+function renderItems(data) {
+  const tbody = document.getElementById('items-tbody');
+  tbody.innerHTML = data.map(item => `
+    <tr>
+      <td style="color:var(--text-3);font-size:13px">#${item.id}</td>
+      <td>
+        <button class="action-link" onclick='loadDetail(${JSON.stringify({title:item.title,status:item.status,cat:item.cat,color:item.color,loc:item.location,date:item.date,kw:item.kw,desc:item.desc,reporter:item.reporter})});showPage("detail")'>${item.title}</button>
+      </td>
+      <td style="font-size:13px;color:var(--text-2)">${item.cat}</td>
+      <td><span class="badge badge-${item.status.toLowerCase()}">${item.status}</span></td>
+      <td style="font-size:13px;color:var(--text-2)">${item.location}</td>
+      <td style="font-size:13px;color:var(--text-3)">${item.date}</td>
+      <td>
+        <div class="reporter-chip">
+          <div class="avatar">${item.reporter.split(' ').map(w=>w[0]).join('').slice(0,2)}</div>
+          <span style="font-size:13px">${item.reporter}</span>
+        </div>
+      </td>
+      <td>
+        <button class="action-link btn-sm" onclick='loadDetail(${JSON.stringify({title:item.title,status:item.status,cat:item.cat,color:item.color,loc:item.location,date:item.date,kw:item.kw,desc:item.desc,reporter:item.reporter})});showPage("detail")'>View</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function renderAudit() {
+  const tbody = document.getElementById('audit-tbody');
+  const actionColors = {
+    'ITEM_CREATED':'badge-found','ITEM_UPDATED':'badge-pending','ITEM_DELETED':'badge-rejected',
+    'CLAIM_SUBMITTED':'badge-pending','CLAIM_APPROVED':'badge-approved','CLAIM_REJECTED':'badge-rejected',
+    'USER_REGISTERED':'badge-claimed'
+  };
+  tbody.innerHTML = AUDIT_DATA.map(log => `
+    <tr>
+      <td style="color:var(--text-3);font-size:12px">${log.id}</td>
+      <td><span class="audit-action">${log.action}</span></td>
+      <td style="font-size:13px;color:var(--text-2)">${log.entity} <span style="color:var(--text-3)">#${log.eid}</span></td>
+      <td>
+        <div class="reporter-chip">
+          <div class="avatar">${log.user.split(' ').map(w=>w[0]).join('').slice(0,2)}</div>
+          <span style="font-size:13px">${log.user}</span>
+        </div>
+      </td>
+      <td style="font-size:13px;color:var(--text-3)">${log.ts}</td>
+    </tr>
+  `).join('');
+}
+
+// ─── NAVIGATION ───
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.querySelectorAll('.navbar-nav a').forEach(a => a.classList.remove('active'));
+  const navEl = document.getElementById('nav-' + name);
+  if (navEl) navEl.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function loadDetail(item) {
+  document.getElementById('detail-title').textContent = item.title;
+  document.getElementById('detail-sub').textContent = `Reported on ${item.date} · ${item.loc}`;
+  document.getElementById('dc-title').textContent = item.title;
+  document.getElementById('dc-desc').textContent = item.desc;
+  document.getElementById('dc-cat').textContent = item.cat;
+  document.getElementById('dc-color').textContent = item.color;
+  document.getElementById('dc-loc').textContent = item.loc;
+  document.getElementById('dc-date').textContent = item.date;
+  document.getElementById('dc-kw').textContent = item.kw;
+  const statusEl = document.getElementById('dc-status');
+  statusEl.textContent = item.status;
+  statusEl.className = 'badge badge-' + item.status.toLowerCase();
+  const rp = document.querySelector('.reporter-chip span');
+  rp.textContent = item.reporter;
+  document.querySelector('.reporter-chip .avatar').textContent = item.reporter.split(' ').map(w=>w[0]).join('').slice(0,2);
+}
+
+// ─── FILTER ───
+function filterItems(q) {
+  const term = q.toLowerCase();
+  const filtered = ITEMS.filter(i =>
+    i.title.toLowerCase().includes(term) ||
+    i.kw.toLowerCase().includes(term) ||
+    i.desc.toLowerCase().includes(term) ||
+    i.cat.toLowerCase().includes(term) ||
+    i.location.toLowerCase().includes(term)
+  );
+  renderItems(filtered);
+  document.getElementById('pagination-info').textContent = `Showing 1–${Math.min(10,filtered.length)} of ${filtered.length} items`;
+}
+
+function filterByStatus(status) {
+  const filtered = status ? ITEMS.filter(i => i.status === status) : ITEMS;
+  renderItems(filtered);
+}
+
+// ─── TABS ───
+function switchTab(btn, tabId) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-submitted').style.display = 'none';
+  document.getElementById('tab-received').style.display = 'none';
+  document.getElementById(tabId).style.display = 'block';
+}
+
+// ─── AUTH ───
+function doLogin() {
+  const email = document.getElementById('login-email').value;
+  const name = email.split('@')[0].replace('.', ' ').replace(/\b\w/g, c => c.toUpperCase()) || 'User';
+  currentUser = { name, email };
+  document.getElementById('auth-actions').style.display = 'none';
+  document.getElementById('user-actions').style.display = 'flex';
+  document.getElementById('user-name').textContent = name.split(' ')[0] + ' ' + (name.split(' ')[1]?.[0] || '') + '.';
+  document.getElementById('user-avatar').textContent = name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  showToast('Signed in successfully!');
+  showPage('items');
+}
+
+function doRegister() {
+  const name = document.getElementById('reg-name').value || 'New User';
+  const email = document.getElementById('reg-email').value;
+  currentUser = { name, email };
+  document.getElementById('auth-actions').style.display = 'none';
+  document.getElementById('user-actions').style.display = 'flex';
+  document.getElementById('user-name').textContent = name.split(' ')[0] + ' ' + (name.split(' ')[1]?.[0]||'') + '.';
+  document.getElementById('user-avatar').textContent = name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  showToast('Account created! Welcome to Findora.');
+  showPage('items');
+}
+
+function doLogout() {
+  currentUser = null;
+  document.getElementById('auth-actions').style.display = 'flex';
+  document.getElementById('user-actions').style.display = 'none';
+  showToast('Signed out.');
+  showPage('items');
+}
+
+// ─── REPORT ───
+function submitReport() {
+  const title = document.getElementById('item-title').value;
+  if (!title) { showToast('Please enter a title.'); return; }
+  const statusVal = document.querySelector('input[name="item-status"]:checked').value;
+  showToast('Item reported successfully!');
+  if (statusVal === 'LOST') {
+    document.getElementById('match-suggestions').style.display = 'block';
+    document.getElementById('match-suggestions').scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+// ─── TOAST ───
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ─── INIT ───
+renderItems(ITEMS);
+renderAudit();
+
+// Set today as default date
+const today = new Date().toISOString().split('T')[0];
+const dateInput = document.getElementById('item-date');
+if (dateInput) dateInput.value = today;
+</script>
+</body>
+</html>
