@@ -4,6 +4,8 @@ import com.lostandfound.findora.model.AuditLog;
 import com.lostandfound.findora.model.User;
 import com.lostandfound.findora.repository.AuditLogRepository;
 import com.lostandfound.findora.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -33,5 +35,20 @@ public class AuditLogServiceImpl implements AuditLogService {
         }
 
         auditLogRepository.save(log);
+    }
+
+    @Override
+    public Page<AuditLog> getAllLogs(Pageable pageable) {
+        return auditLogRepository.findAll(pageable);
+    }
+
+    @Override
+    public Page<AuditLog> getLogsByUser(Integer userId, Pageable pageable) {
+        return auditLogRepository.findAllByUserId(userId, pageable);
+    }
+
+    @Override
+    public Page<AuditLog> getLogsByEntity(String entityName, Integer entityId, Pageable pageable) {
+        return auditLogRepository.findAllByEntityNameAndEntityId(entityName, entityId, pageable);
     }
 }
